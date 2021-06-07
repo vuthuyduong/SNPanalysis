@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# FILE: computePairwiseSNPs.py
+# AUTHOR: Duong Vu
+# CREATE DATE: 07 May 2021
 import sys, argparse
 import os
 from Bio import SeqIO
@@ -7,7 +10,7 @@ import json
 parser=argparse.ArgumentParser(prog='computePairwiseSNPs.py',  
 							   usage="%(prog)s [options] -i jsoninputfilename -f fastafile -o outputfile",
 							   description='''Script that compares the SNP number differences.''',
-							   epilog="""Written by Duong Vu duong.t.vu@gmail.com""",
+							   epilog="""Written by Duong Vu d.vu@wi.knaw.nl""",
    )
 
 parser.add_argument('-i','--fasta', help='The fasta alignment file.') 

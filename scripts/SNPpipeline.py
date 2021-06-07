@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# FILE: SNPpipeline.py
+# AUTHOR: Duong Vu
+# CREATE DATE: 07 May 2021
 import sys, argparse
 import os
 import json
@@ -16,7 +19,7 @@ import vcf
 parser=argparse.ArgumentParser(prog='SNPpipeline.py',  
 							   usage="%(prog)s [options] -i jsoninputfilename -o outputfolder",
 							   description='''Script that compares the given genomes (fastq files) with a reference genome based on SNP number differences.''',
-							   epilog="""Written by Duong Vu duong.t.vu@gmail.com""",
+							   epilog="""Written by Duong Vu d.vu@wi.knaw.nl""",
    )
 
 parser.add_argument('-i','--input', required=True, help='the json file containing all information about the genomes.')
