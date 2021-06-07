@@ -3,4 +3,5 @@ The SNP pipeline is to generate a vcf file based on the raw data (fastq files) o
 
 ## References
 Edge, P., Bansal, V. Longshot enables accurate variant calling in diploid genomes from single-molecule long read sequencing. Nat Commun 10, 4660 (2019).
+
 Van der Auwera GA & O'Connor BD. (2020). Genomics in the Cloud: Using Docker, GATK, and WDL in Terra (1st Edition). O'Reilly Media.
