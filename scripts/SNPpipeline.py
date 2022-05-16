@@ -45,7 +45,7 @@ def SNP_calling_longshot(genome,reference):
 		refasm=dataprefix + refasm
 	reffai = reference["fai"]
 	if not reffai.startswith("/"):
-		reffao=dataprefix + reffai	
+		reffai=dataprefix + reffai	
 	#index the reference with samtools faidx 
 	command = samtools + " faidx " + refasm
 	if not os.path.exists(reffai):
