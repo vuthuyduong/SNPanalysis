@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# FILE: SNPpipeline.py
-# AUTHOR: Duong Vu
-# CREATE DATE: 07 May 2021
 import sys, argparse
 import os
 import json
@@ -9,6 +6,7 @@ import json
 import sys,os
 import pandas as pd
 from Bio import SeqIO
+from pysam import VariantFile
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 
@@ -19,23 +17,18 @@ import vcf
 parser=argparse.ArgumentParser(prog='SNPpipeline.py',  
 							   usage="%(prog)s [options] -i jsoninputfilename -o outputfolder",
 							   description='''Script that compares the given genomes (fastq files) with a reference genome based on SNP number differences.''',
-							   epilog="""Written by Duong Vu d.vu@wi.knaw.nl""",
+							   epilog="""Written by Duong Vu duong.t.vu@gmail.com""",
    )
 
 parser.add_argument('-i','--input', required=True, help='the json file containing all information about the genomes.')
 parser.add_argument('-o','--out', help='The folder for the results.') 
-parser.add_argument('-clades','--clades', default="", help='The folder for the results.') 
-parser.add_argument('-cladekey','--cladekey', default="Clade", help='The folder for the results.') 
 parser.add_argument('-prefix','--prefix', default="allsnps", help='The folder for the results.') 
-parser.add_argument('-maxSeqNo','--maxSeqNoForClade', type=int,default=0, help='The maximum number of sequences for each clade.') 
 
 args=parser.parse_args()
 inputfilename= args.input
-clade= args.clades
-cladekey= args.cladekey
+
 prefix= args.prefix
 resultfoldername= args.out
-maxSeqNo=args.maxSeqNoForClade
 
 
 def SNP_calling_longshot(genome,reference):
@@ -45,7 +38,7 @@ def SNP_calling_longshot(genome,reference):
 		refasm=dataprefix + refasm
 	reffai = reference["fai"]
 	if not reffai.startswith("/"):
-		reffai=dataprefix + reffai	
+		reffao=dataprefix + reffai	
 	#index the reference with samtools faidx 
 	command = samtools + " faidx " + refasm
 	if not os.path.exists(reffai):
@@ -140,10 +133,13 @@ def SNP_calling_gatk(genome,reference):
 	markedfile=result + ".marked.bam"
 	markedtxtfile= result + ".marked.txt"
 	vcffile=result + ".vcf"
-
+#	reportfile=result + "_report.table"
+#	bqsrbamfile=result + "_bqsr.bam"
+#	bqsrvcffile=result + "_bqsr.vcf"
 	snpfile=result + ".snp.vcf"
 	filteredsnpfile=result + ".filtered.snp.vcf"
-
+#	indelfile=result + ".indel.vcf"
+#	filteredindelfile=result + ".filtered.indel.vcf"
 	#mapping
 	command = bwa + " mem -M -R \"@RG\\tID:group1\\tSM:" + genomeid + "\\tPL:illumina\\tLB:lib1\\tPU:unit1\" " + refidx + " " + fastq1 + " " + fastq2 + " > " + samfile
 	if not os.path.exists(samfile):
@@ -169,6 +165,22 @@ def SNP_calling_gatk(genome,reference):
 	if os.path.exists(markedfile) and not os.path.exists(vcffile):
 		print("Predict vcf :" + command)	
 		os.system(command)
+#	#6, BaseRecalibrator
+#	command = gatk + " BaseRecalibrator -R " + refasm + " -I " + markedfile + "  -O " + reportfile + " -known-sites " + vcffile + " -use-original-qualities" 
+#	if os.path.exists(vcffile) and not os.path.exists(reportfile):
+#		print("BaseRecalibrator:" + command)
+#		os.system(command)
+#	#7, ApplyBQSR
+#	command = gatk + " ApplyBQSR -R " + refasm + " -I " + markedfile + " -bqsr-recal-file " + reportfile + " -O " + bqsrbamfile
+#	if os.path.exists(reportfile) and not os.path.exists(bqsrbamfile):
+#		print("ApplyBQSR:" + command)
+#		os.system(command)
+#	#8, Predict vcf file based on BQSR
+#	command = gatk + " HaplotypeCaller -R " + refasm + " -I " + bqsrbamfile + " -O " + bqsrvcffile
+#	if os.path.exists(bqsrbamfile) and not os.path.exists(bqsrvcffile):
+#		print("Predict vcf based on BQSR:" + command)
+#		os.system(command)
+		
 	#9, Select the snp
 	command = gatk + " SelectVariants -select-type SNP -V " + vcffile + " -O " + snpfile
 	if os.path.exists(vcffile) and not os.path.exists(snpfile):
@@ -180,6 +192,16 @@ def SNP_calling_gatk(genome,reference):
 	if os.path.exists(snpfile) and not (os.path.exists(filteredsnpfile) or os.path.exists(filteredsnpfile +".gz")):
 		print("Filter the snp: " + command)
 		os.system(command)
+#	#11, Select the indel
+#	command = gatk + " SelectVariants -select-type INDEL -V " + bqsrvcffile + " -O "+ indelfile
+#	if os.path.exists(bqsrvcffile) and not  os.path.exists(indelfile): 
+#		print("Select the indel :"  + command)
+#		os.system(command)
+#	#12, Filter the indel
+#	command = gatk + " VariantFiltration -V " + indelfile + " --filter-expression \"Q< 2.0 || FS > 200.0 || SOR > 10.0 || MQRankSum < -12.5|| ReadPosRankSum < -8.0\" --filter-name \"Filter\" -O " + filteredindelfile
+#	if os.path.exists(indelfile) and not os.path.exists(filteredindelfile):
+#		print("Filter the indel: " + command)
+#		os.system(command)
 
 def Download(genome):
 	fastq=""
@@ -300,6 +322,36 @@ def fasta_alignment_from_vcf(vcf_file, ref):
 		SeqRecord(Seq(sequence),id=samples[i],description='')
 		i=i+1
 	return records
+#def get_sequence(ref_seq, variants, s, p):
+#	seq = list(str(ref_seq))
+#	for v in variants:
+#        #In order to create a correct alignement, we need to determine the length of the longest allele if the variant is an indel
+#		max_indel_length = max(map(len,v.alleles))
+#		#Now we determine the allele of the individual at the specified phase
+#		allele = v.samples[s].alleles[p]
+#		allele = allele if allele is not None else 'N'
+#		#Adding the appropriate number of - so alignment stays intact
+#		if len(allele) != max_indel_length:
+#			allele += '-'*(max_indel_length-len(allele))
+#		seq[v.pos] =  allele
+#	return ''.join(seq)
+#
+#def alignment_from_vcf(refasm,mergedvcffilename,samples):
+#	#index the vcffile
+#	cmd=tabix + " -p vcf " + mergedvcffilename
+#	os.system(cmd)	
+#	ref = SeqIO.index(refasm, "fasta")
+#	vcffile = VariantFile(mergedvcffilename)
+#	records=[]
+#	for s in samples:
+#		sequence=""
+#		for recid in ref.keys():
+#			ref_seq=ref[recid].seq
+#			variants = list(vcffile.fetch(recid,0,len(str(ref_seq))))
+#			sequence=sequence+get_sequence(ref_seq,variants,s,0)
+#		record=SeqRecord(Seq(sequence),id=s,description='')
+#		records.append(record)
+#	return records
 	
 def TabixVcf(genome):
 	genomeid = genome["id"]
@@ -345,29 +397,15 @@ dataprefix=data["dataprefix"]
 
 if not os.path.exists(resultfoldername):
 	os.system("mkdir " + resultfoldername)
-clades=clade.split(",")
+#clades=clade.split(",")
 vcffilenames=" "
-numbers={}
+#numbers={}
 samples=[]
 longreads=[]
 shortreads=[]
 for key in genomes.keys():
 	genome=genomes[key]
-	c=""
-	if cladekey in genome.keys():
-		c=genome[cladekey]
-	if clade!="":
-		if c!="" and (not c in clades):
-			continue
-	if maxSeqNo >0 and c!="":
-		if not c in numbers.keys():
-			numbers.setdefault(c,1)
-		else:
-			n=numbers[c]
-			if n>=maxSeqNo:
-				continue
-			numbers[c]=n+1
-	#download fastq file
+	#download fastq file if not existed
 	Download(genome)
 	fastq=""
 	fastq1=""
@@ -397,6 +435,12 @@ for key in genomes.keys():
 	gvcffile=TabixVcf(genome)	
 	vcffilenames=vcffilenames + gvcffile + " "
 	
+print("The number of long read sequencing samples: " + str(len(shortreads)))	
+print(shortreads)
+	
+print("The number of long read sequencing samples: " + str(len(longreads)))
+print(longreads)
+
 #Merge the snps
 allsnps=resultfoldername + "/" + prefix + ".vcf.gz"	
 if not os.path.exists(allsnps):
@@ -406,15 +450,15 @@ if not os.path.exists(allsnps):
 else:
 	print("Use the existing file " +  allsnps + ".")	
 os.system("gunzip " + allsnps)
-alignmentfilename=resultfoldername + "/" + prefix + ".aligned.fasta"
-refasm = reference["asm"]
-if not refasm.startswith("/"):
-	refasm=dataprefix + refasm
+#alignmentfilename=resultfoldername + "/" + prefix + ".aligned.fasta"
+#refasm = reference["asm"]
+#if not refasm.startswith("/"):
+#	refasm=dataprefix + refasm
 
 #records=alignment_from_vcf(refasm,allsnps,samples)
-records=fasta_alignment_from_vcf(resultfoldername + "/" + prefix + ".vcf", refasm)
+#records=fasta_alignment_from_vcf(resultfoldername + "/" + prefix + ".vcf", refasm)
 #Save the alignment:
-SeqIO.write(records, alignmentfilename, "fasta")
+#SeqIO.write(records, alignmentfilename, "fasta")
 
 	
 	
