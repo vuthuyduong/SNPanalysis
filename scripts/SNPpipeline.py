@@ -447,9 +447,11 @@ if not os.path.exists(allsnps):
 	cmd = vcfmerge + vcffilenames + " | bgzip -c > " + allsnps
 	print(cmd)
 	os.system(cmd)
+	os.system("gunzip " + allsnps)
+	print("The vcf are saved in file " + allsnps +".")
 else:
-	print("Use the existing file " +  allsnps + ".")	
-os.system("gunzip " + allsnps)
+	print("File " +  allsnps + " exists. Please delete the file " + allsnps + " if you want to create a new vcf file.")
+
 #alignmentfilename=resultfoldername + "/" + prefix + ".aligned.fasta"
 #refasm = reference["asm"]
 #if not refasm.startswith("/"):
