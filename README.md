@@ -4,7 +4,9 @@ The SNP pipeline is to generate a vcf file based on the raw data (fastq files) o
 ## Dependencies (see examples/SNP_data_B8441.json for example):
 
 - [longshot](https://www.nature.com/articles/s41467-019-12493-y), used for long reads
+- [minimap2](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778), used to map long reads to the reference genome
 - [gatk](https://gatk.broadinstitute.org/hc/en-us), used short reads
+- [bwa](https://bio-bwa.sourceforge.net/), used to map short reads to the reference genome 
 - [sratoolkit](https://github.com/ncbi/sra-tools), optional for downloading sra
 - [picard](https://broadinstitute.github.io/picard/), optional for marking duplicates for short reads
 
