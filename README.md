@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/374599160.svg)](https://zenodo.org/badge/latestdoi/374599160)
+
 # SNPanalysis
 The SNP pipeline is to generate a vcf file based on the raw data (fastq files) of the given samples. The script scripts/SNPpipeline.py requires an input as a json file (examples/SNP_data_B8441.json for example) containing all information about the genomes and the tools used for the analysis. Longshot (Edge et al. 2019)  is used for long sequencing reads (nanopore for example), and gatk (Van der Auwera & O'Connor 2020) is used for short sequencing reads (Illumina for example).
 
