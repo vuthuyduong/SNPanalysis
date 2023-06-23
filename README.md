@@ -17,4 +17,4 @@ The SNP pipeline is to generate a vcf file based on the raw data (fastq files) o
 scripts/SNPpipeline.py -i examples/SNP_data_B8441.json -o B8441_vcf -prefix allsnps
 
 ## References
-Duong Vu (2021). https://github.com/vuthuyduong/SNPanalysis. https://doi.org/10.5281/zenodo.8046747
+Duong Vu (2021). https://github.com/vuthuyduong/SNPanalysis. [DOI: 10.5281/zenodo.8046747](https://doi.org/10.5281/zenodo.8046747)
