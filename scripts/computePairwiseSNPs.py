@@ -14,7 +14,7 @@ parser=argparse.ArgumentParser(prog='computePairwiseSNPs.py',
    )
 
 parser.add_argument('-i','--fasta', help='The fasta alignment file.') 
-parser.add_argument('-o','--out', help='The folder for the results.') 
+parser.add_argument('-o','--out', help='The output filename.') 
 args=parser.parse_args()
 outputfilename= args.out
 fastafilename=args.fasta
