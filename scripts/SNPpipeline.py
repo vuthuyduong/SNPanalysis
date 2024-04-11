@@ -4,7 +4,7 @@ import os
 import json
 
 import sys,os
-import pandas as pd
+#import pandas as pd
 from Bio import SeqIO
 from pysam import VariantFile
 from Bio.SeqRecord import SeqRecord
