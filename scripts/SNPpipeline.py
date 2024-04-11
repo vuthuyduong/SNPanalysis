@@ -223,7 +223,7 @@ def Download(genome):
 		return
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
 		return
-	genomefolder=dataprefix + genome["id"]
+	genomefolder=dataprefix + "/" + genome["id"]
 	if os.path.exists(genomefolder):
 		command="mkdir " + genomefolder
 		print(command)
@@ -250,6 +250,9 @@ def Download(genome):
 		os.system(command)
 		#remove sra file
 		os.system("rm " + genomefolder + "/" + srafilename)	
+		if os.path.exists(sra):
+			os.system("rm -r " + sra )
+		os.system("rm fasterq.tmp.*")	
 	if not (os.path.exists(fastq) or (os.path.exists(fastq1) and os.path.exists(fastq2))):	
 		print("Cannot find sra file for " + genome['id'])
 		logfile=open("SNPpipeline.log","w")
@@ -275,7 +278,7 @@ def TabixVcf(genome):
 ####################MAIN####################
 with open(inputfilename) as data_file:
 	data = json.load(data_file)	
-dataprefix=data["dataprefix"]	
+dataprefix=data["dataprefix"] 
 bwa=data['bwa']
 #trim_file=data['trim_file']
 minimap2=data['minimap2']	
@@ -338,11 +341,9 @@ for key in genomes.keys():
 	gvcffile=TabixVcf(genome)	
 	vcffilenames=vcffilenames + gvcffile + " "
 	
-print("The number of long read sequencing samples: " + str(len(shortreads)))	
-print(shortreads)
+#print("The number of long read sequencing samples: " + str(len(shortreads)))	
+#print(shortreads)
 	
-print("The number of long read sequencing samples: " + str(len(longreads)))
-print(longreads)
 
 #Merge the snps
 allsnps=resultfoldername + "/" + prefix + ".vcf.gz"	
