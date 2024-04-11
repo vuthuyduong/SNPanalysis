@@ -248,16 +248,17 @@ def Download(genome):
 		command = fasterq_dump + " --split-files " + genomefolder + "/" + srafilename + " -O " + genomefolder
 		print(command)
 		os.system(command)
+		os.system("rm -r fasterq.tmp.*")
 		#remove sra file
 		os.system("rm " + genomefolder + "/" + srafilename)	
 		if os.path.exists(sra):
-			os.system("rm -r " + sra )
-		os.system("rm fasterq.tmp.*")	
+			os.system("rm -r " + sra )	
 	if not (os.path.exists(fastq) or (os.path.exists(fastq1) and os.path.exists(fastq2))):	
 		print("Cannot find sra file for " + genome['id'])
 		logfile=open("SNPpipeline.log","w")
 		logfile.write("Cannot download sra for " + genome["id"] + "\n")
 		logfile.close()
+	
 	
 def TabixVcf(genome):
 	genomeid = genome["id"]
