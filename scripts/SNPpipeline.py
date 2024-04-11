@@ -3,16 +3,16 @@ import sys, argparse
 import os
 import json
 
-import sys,os
+#import sys,os
 #import pandas as pd
-from Bio import SeqIO
-from pysam import VariantFile
-from Bio.SeqRecord import SeqRecord
-from Bio.Seq import Seq
+#from Bio import SeqIO
+#from pysam import VariantFile
+#from Bio.SeqRecord import SeqRecord
+#from Bio.Seq import Seq
 
-from pyfaidx import Fasta
-from pyfaidx import FastaVariant
-import vcf
+#from pyfaidx import Fasta
+#from pyfaidx import FastaVariant
+#import vcf
 
 parser=argparse.ArgumentParser(prog='SNPpipeline.py',  
 							   usage="%(prog)s [options] -i jsoninputfilename -o outputfolder",
@@ -38,7 +38,7 @@ def SNP_calling_longshot(genome,reference):
 		refasm=dataprefix + refasm
 	reffai = reference["fai"]
 	if not reffai.startswith("/"):
-		reffao=dataprefix + reffai	
+		reffai=dataprefix + reffai	
 	#index the reference with samtools faidx 
 	command = samtools + " faidx " + refasm
 	if not os.path.exists(reffai):
@@ -255,103 +255,6 @@ def Download(genome):
 		logfile=open("SNPpipeline.log","w")
 		logfile.write("Cannot download sra for " + genome["id"] + "\n")
 		logfile.close()
-		
-def sequence_from_variant(vcf_file, ref,samples,chrom):	
-	result = []
-	#get the set of all sites first
-	sites=[]
-	for sample in samples:      
-		variant = FastaVariant(ref, vcf_file, sample=sample, het=True, hom=True)
-		pos = list(variant[chrom].variant_sites)
-		sites.extend(pos)
-		sites = sorted(set(sites))
-	print ('using %s sites' %len(sites))
-	#get reference sequence for site positions
-	refseq=[]
-	for p in sites:
-		refseq.append(reference[chrom][p-1].seq)
-	refseq = ''.join(refseq)
-	#seqrecord for reference
-	refrec = SeqIO.SeqRecord(SeqIO.Seq(refseq),id='ref')
-	result.append(refrec)
-	sites_matrix = {}
-	#iterate over variants in each sample
-	for sample in samples:        
-		seq=[]
-		variant = FastaVariant(ref, vcf_file,sample=sample, het=True, hom=True)
-		for p in sites:        
-			rec = variant[chrom][p-1:p]    
-			seq.append(rec.seq)
-		seq = ''.join(seq)
-		#make seqrecord for the samples sites  
-		seqrec = SeqIO.SeqRecord(SeqIO.Seq(seq),id=sample)
-		result.append(seqrec)
-		sites_matrix[sample] = list(seqrec)
-	df = pd.DataFrame(sites_matrix)
-	df.index=sites    
-	return result, df	
-
-def fasta_alignment_from_vcf(vcf_file, ref):
-	"""
-	Get a fasta alignment for all snp sites in a multi
-	sample vcf file, including the reference sequence.
-	"""
-
-	#index vcf
-	cmd = 'tabix -p vcf -f {i}'.format(i=vcf_file)
-	os.system(cmd)
-	#tmp = subprocess.check_output(cmd,shell=True)
-	#get samples from vcf
-	vcf_reader = vcf.Reader(open(vcf_file, 'rb'))
-	samples = vcf_reader.samples
-	print ('%s samples' %len(samples))
-	
-    #reference sequence
-	reference = Fasta(ref)
-	chrom = list(reference.keys())[0]
-	sequences=[]*len(samples)
-	for chrom in reference.keys():
-		result,df=sequence_from_variant(vcf_file,ref,samples,chrom)
-		i=0
-		for rec in result:
-			sequences[i]=sequences[i] + str(rec.seq)
-			i=i+1
-	records=[]
-	i=0
-	for sequence in sequences:
-		SeqRecord(Seq(sequence),id=samples[i],description='')
-		i=i+1
-	return records
-#def get_sequence(ref_seq, variants, s, p):
-#	seq = list(str(ref_seq))
-#	for v in variants:
-#        #In order to create a correct alignement, we need to determine the length of the longest allele if the variant is an indel
-#		max_indel_length = max(map(len,v.alleles))
-#		#Now we determine the allele of the individual at the specified phase
-#		allele = v.samples[s].alleles[p]
-#		allele = allele if allele is not None else 'N'
-#		#Adding the appropriate number of - so alignment stays intact
-#		if len(allele) != max_indel_length:
-#			allele += '-'*(max_indel_length-len(allele))
-#		seq[v.pos] =  allele
-#	return ''.join(seq)
-#
-#def alignment_from_vcf(refasm,mergedvcffilename,samples):
-#	#index the vcffile
-#	cmd=tabix + " -p vcf " + mergedvcffilename
-#	os.system(cmd)	
-#	ref = SeqIO.index(refasm, "fasta")
-#	vcffile = VariantFile(mergedvcffilename)
-#	records=[]
-#	for s in samples:
-#		sequence=""
-#		for recid in ref.keys():
-#			ref_seq=ref[recid].seq
-#			variants = list(vcffile.fetch(recid,0,len(str(ref_seq))))
-#			sequence=sequence+get_sequence(ref_seq,variants,s,0)
-#		record=SeqRecord(Seq(sequence),id=s,description='')
-#		records.append(record)
-#	return records
 	
 def TabixVcf(genome):
 	genomeid = genome["id"]
@@ -451,16 +354,6 @@ if not os.path.exists(allsnps):
 	print("The vcf are saved in file " + allsnps +".")
 else:
 	print("File " +  allsnps + " exists. Please delete the file " + allsnps + " if you want to create a new vcf file.")
-
-#alignmentfilename=resultfoldername + "/" + prefix + ".aligned.fasta"
-#refasm = reference["asm"]
-#if not refasm.startswith("/"):
-#	refasm=dataprefix + refasm
-
-#records=alignment_from_vcf(refasm,allsnps,samples)
-#records=fasta_alignment_from_vcf(resultfoldername + "/" + prefix + ".vcf", refasm)
-#Save the alignment:
-#SeqIO.write(records, alignmentfilename, "fasta")
 
 	
 	
