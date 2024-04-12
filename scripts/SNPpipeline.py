@@ -223,7 +223,7 @@ def Download(genome):
 		return
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
 		return
-	genomefolder=dataprefix + "/" + genome["id"]
+	genomefolder=dataprefix + genome["id"]
 	if os.path.exists(genomefolder):
 		command="mkdir " + genomefolder
 		print(command)
