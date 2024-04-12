@@ -279,7 +279,8 @@ def TabixVcf(genome):
 ####################MAIN####################
 with open(inputfilename) as data_file:
 	data = json.load(data_file)	
-dataprefix=data["dataprefix"] 
+dataprefix=data["dataprefix"] + "/"
+dataprefix=dataprefix.replace("//","/")
 bwa=data['bwa']
 #trim_file=data['trim_file']
 minimap2=data['minimap2']	
@@ -312,11 +313,10 @@ longreads=[]
 shortreads=[]
 for key in genomes.keys():
 	genome=genomes[key]
-	#download fastq file if not existed
-	Download(genome)
 	fastq=""
 	fastq1=""
 	fastq2=""
+	genomeexists=False
 	if "fastq" in genome.keys():
 		fastq= genome["fastq"]
 		if not fastq.startswith("/"):
@@ -329,6 +329,11 @@ for key in genomes.keys():
 		fastq2= genome["fastq2"]
 		if not fastq2.startswith("/"):
 			fastq2=dataprefix + fastq2	
+	if (os.path.exists(fastq)) or (os.path.exists(fastq1) and os.path.exists(fastq2)):
+		genomeexists=True
+	else:
+		#download fastq file if not existed
+		Download(genome)
 	print("Looking for the SNPs of " + key)	
 	#SNP calling
 	if os.path.exists(fastq):
@@ -337,6 +342,8 @@ for key in genomes.keys():
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
 		SNP_calling_gatk(genome,reference)
 		shortreads.append(key)
+	else:
+		continue
 	samples.append(key)	
 	#Tabix vcf file
 	gvcffile=TabixVcf(genome)	
