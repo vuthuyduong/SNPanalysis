@@ -301,7 +301,6 @@ if "fasterq-dump" in data.keys():
 	fasterq_dump = data["fasterq-dump"]
 genomes=data['genomes']	
 reference=data['reference']
-dataprefix=data["dataprefix"]
 
 if not os.path.exists(resultfoldername):
 	os.system("mkdir " + resultfoldername)
