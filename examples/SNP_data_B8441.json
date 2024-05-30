@@ -3,7 +3,6 @@
   "longshot": "longshot",
   "bwa":"bwa",
   "minimap2":"minimap2",
-  "trim_file":"TrimmomaticPE",
   "samtools":"samtools",
   "vcftools":"vcftools",
   "vcfmerge":"vcf-merge",
