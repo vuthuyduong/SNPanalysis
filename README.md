@@ -12,6 +12,7 @@ The SNP pipeline is to generate a vcf file based on the raw data (fastq files) o
 - [sratoolkit](https://github.com/ncbi/sra-tools), optional for downloading sra
 - [picard](https://broadinstitute.github.io/picard/), optional for marking duplicates for short reads
 - [vcftools](https://github.com/vcftools/vcftools), for merging vcf files
+- [sratoolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit), optional, for downloading fastq files if SRA accession numbers are given
 
 ## How to create a vcf file
 
