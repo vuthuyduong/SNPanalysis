@@ -1,0 +1,64 @@
+#installing Anaconda
+
+sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
+
+bash ~/Downloads/Anaconda3-<INSTALLER_VERSION>-Linux-x86_64.sh
+
+#install bioconda
+
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+
+#longshot
+conda install longshot
+
+#minimap2
+conda install minimap2
+
+#installing gatk: https://gatk.broadinstitute.org/hc/en-us/articles/360041320571--How-to-Install-all-software-packages-required-to-follow-the-GATK-Best-Practices
+
+#java
+sudo apt install openjdk-17-jdk openjdk-17-jre
+
+#bwa
+sudo apt install bwa
+
+#samtools download
+bzip2 -d samtools-1.20.tar.bz2
+tar -xvf samtools-1.20.tar
+
+#dependencies of samtools
+
+sudo apt-get install libncurses-dev
+sudo apt-get install liblzma-dev
+sudo apt-get install libbz2-dev
+sudo apt-get install libcurl4-openssl-dev
+
+cd samtools-1.20
+make
+
+#tabix
+sudo apt install tabix
+
+#picard
+
+git clone https://github.com/broadinstitute/picard.git
+./gradlew shadowJar
+
+java -jar /home/dvu/data/indoor_fungi_storage/tools/picard/build/libs/picard.jar
+#./gradlew jar
+
+#gatk: download gatk
+/home/dvu/data/indoor_fungi_storage/tools/gatk-4.5.0.0/./gatk
+
+#vcftools
+sudo apt install vcftools
+
+#sratoolkit
+
+wget --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
+
+tar -vxzf sratoolkit.tar.gz
+
+
