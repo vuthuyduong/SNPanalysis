@@ -22,6 +22,7 @@ parser=argparse.ArgumentParser(prog='SNPpipeline.py',
 
 parser.add_argument('-i','--input', required=True, help='the json file containing all information about the genomes.')
 parser.add_argument('-o','--out', help='The folder for the results.') 
+parser.add_argument('-download','--download', default="no", help='download fastq files using sra accession numbers if -download yes, otherwise not.') 
 parser.add_argument('-prefix','--prefix', default="allsnps", help='The folder for the results.') 
 
 args=parser.parse_args()
@@ -224,7 +225,7 @@ def Download(genome):
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
 		return
 	genomefolder=dataprefix + genome["id"]
-	if os.path.exists(genomefolder):
+	if not os.path.exists(genomefolder):
 		command="mkdir " + genomefolder
 		print(command)
 		os.system(command)
@@ -232,27 +233,36 @@ def Download(genome):
 	if "sra" in genome.keys():
 		sra=genome["sra"]
 	if sra!= "":
-		print("Download sra for " + genome["id"])
 		#download sra
 		srafilename= sra + ".sra"
-		command=prefetch + " " + sra
-		print(command)
-		os.system(command)
-		if os.path.exists("~/ncbi/public/sra/" + srafilename):
-			#move srafile to the working folder
-			os.system("mv ~/ncbi/public/sra/" + srafilename + " " + genomefolder + "/")
-		else:
-			command = "curl \"https://sra-pub-run-odp.s3.amazonaws.com/sra/" + sra + "/" + sra +"\" > " + genomefolder + "/" + srafilename
+		print("Download sra for " + genome["id"])
+		#try to download by sratoolkit		
+		if not os.path.exists(genomefolder + "/" + srafilename):
+			command=prefetch + " " + sra
 			print(command)
+			os.system(command)
+			if os.path.exists(sra + "/" + srafilename):
+				print("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
+				os.system("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
+				os.system("rm -r " + sra )		
+			elif os.path.exists("~/ncbi/public/sra/" + srafilename):
+				#move srafile to the working folder
+				print("mv ~/ncbi/public/sra/" + srafilename + " " + genomefolder + "/")
+				os.system("mv ~/ncbi/public/sra/" + srafilename + " " + genomefolder + "/")	
+				os.system("rm ~/ncbi/public/sra/" + srafilename)
+		#try to download from amazonaws	
+		if not os.path.exists(genomefolder + "/" + srafilename):
+			command = "curl \"https://sra-pub-run-odp.s3.amazonaws.com/sra/" + sra + "/" + sra +"\" > " + genomefolder + "/" + srafilename
+			print(command)  
 			os.system(command)				
-		command = fasterq_dump + " --split-files " + genomefolder + "/" + srafilename + " -O " + genomefolder
-		print(command)
-		os.system(command)
-		os.system("rm -r fasterq.tmp.*")
-		#remove sra file
-		os.system("rm " + genomefolder + "/" + srafilename)	
-		if os.path.exists(sra):
-			os.system("rm -r " + sra )	
+		if os.path.exists(genomefolder + "/" + srafilename):		
+			command = fasterq_dump + " --split-files " + genomefolder + "/" + srafilename + " -O " + genomefolder
+			print(command)
+			os.system(command)
+			os.system("rm -r fasterq.tmp.*")
+			#remove sra file
+			os.system("rm " + genomefolder + "/" + srafilename)	
+			
 	if not (os.path.exists(fastq) or (os.path.exists(fastq1) and os.path.exists(fastq2))):	
 		print("Cannot find sra file for " + genome['id'])
 		logfile=open("SNPpipeline.log","w")
@@ -286,7 +296,6 @@ bwa=data['bwa']
 minimap2=data['minimap2']	
 longshot=data['longshot']	
 samtools=data['samtools']	
-trim_file=data['trim_file']
 gatk=data['gatk']
 vcftools=data['vcftools']
 vcfmerge=data['vcfmerge']
@@ -330,10 +339,12 @@ for key in genomes.keys():
 			fastq2=dataprefix + fastq2	
 	if (os.path.exists(fastq)) or (os.path.exists(fastq1) and os.path.exists(fastq2)):
 		genomeexists=True
-	else:
+	elif args.download=="yes":
 		#download fastq file if not existed
 		Download(genome)
 	print("Looking for the SNPs of " + key)	
+	if reference["asm"]=="":
+		continue
 	#SNP calling
 	if os.path.exists(fastq):
 		SNP_calling_longshot(genome,reference)
@@ -353,15 +364,16 @@ for key in genomes.keys():
 	
 
 #Merge the snps
-allsnps=resultfoldername + "/" + prefix + ".vcf.gz"	
-if not os.path.exists(allsnps):
-	cmd = vcfmerge + vcffilenames + " | bgzip -c > " + allsnps
-	print(cmd)
-	os.system(cmd)
-	os.system("gunzip " + allsnps)
-	print("The vcf are saved in file " + allsnps +".")
-else:
-	print("File " +  allsnps + " exists. Please delete the file " + allsnps + " if you want to create a new vcf file.")
+if vcffilenames!="":
+	allsnps=resultfoldername + "/" + prefix + ".vcf.gz"	
+	if not os.path.exists(allsnps):	
+		cmd = vcfmerge + vcffilenames + " | bgzip -c > " + allsnps
+		print(cmd)
+		os.system(cmd)
+		os.system("gunzip " + allsnps)
+		print("The vcf are saved in file " + allsnps +".")
+	else:
+		print("File " +  allsnps + " exists. Please delete the file " + allsnps + " if you want to create a new vcf file.")
 
 	
 	
