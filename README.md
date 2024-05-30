@@ -11,6 +11,7 @@ The SNP pipeline is to generate a vcf file based on the raw data (fastq files) o
 - [bwa](https://bio-bwa.sourceforge.net/), used to map short reads to the reference genome 
 - [sratoolkit](https://github.com/ncbi/sra-tools), optional for downloading sra
 - [picard](https://broadinstitute.github.io/picard/), optional for marking duplicates for short reads
+- [vcftools](https://github.com/vcftools/vcftools), for merging vcf files
 
 ## How to create a vcf file
 
