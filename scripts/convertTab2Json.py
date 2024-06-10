@@ -52,6 +52,8 @@ def Tab2Json(inputfilename):
 		texts=line.split("\t")
 		genomeid=""
 		for i in range(len(texts)):
+			if (i >= len(headers) or i >= len(texts)):
+				continue
 			genome[headers[i].rstrip()]=texts[i].rstrip()
 			if genomeid=="":
 				genomeid=texts[i].rstrip()
