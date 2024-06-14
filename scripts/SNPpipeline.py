@@ -31,6 +31,8 @@ inputfilename= args.input
 prefix= args.prefix
 resultfoldername= args.out
 
+def GetBase(filename):
+	return filename[:-(len(filename)-filename.rindex("."))]
 
 def SNP_calling_longshot(genome,reference):
 	refasm = reference["asm"]
@@ -102,9 +104,6 @@ def SNP_calling_gatk(genome,reference):
 	reffai =reference["fai"]
 	if not reffai.startswith("/"):
 		reffai=dataprefix + reffai	
-	refdict = reference["dict"]
-	if not refdict.startswith("/"):
-		refdict=dataprefix + refdict
 	#index the reference
 	command=bwa + " index -p " + refidx + " " + refasm
 	if not os.path.exists(refidx + ".bwt"):
@@ -116,6 +115,7 @@ def SNP_calling_gatk(genome,reference):
 		print("Index the reference: " + command)
 		os.system(command)
 	#create a dictionary for reference
+	refdict = GetBase(refasm) + ".dict"	
 	command= gatk + " CreateSequenceDictionary -R " + refasm + " -O " + refdict
 	if not os.path.exists(refdict):
 		print("Make a dictionary out of the reference: " + command)
@@ -302,6 +302,8 @@ vcfmerge=data['vcfmerge']
 tabix=data['tabix']
 
 picard=data['picard']	
+if not ("java -jar") in picard:
+	picard="java -jar " + picard 
 prefetch=""
 if "prefetch" in data.keys():
 	prefetch=data["prefetch"]
