@@ -95,21 +95,17 @@ def SNP_calling_longshot(genome,reference):
 		os.system("mv out.recode.vcf " + filteredsnpfile)
 		
 def SNP_calling_gatk(genome,reference):	
-	refidx = reference["idx"]
-	if not refidx.startswith("/"):
-		refidx=dataprefix + refidx
 	refasm = reference["asm"]
 	if not refasm.startswith("/"):
 		refasm=dataprefix + refasm
-	reffai =reference["fai"]
-	if not reffai.startswith("/"):
-		reffai=dataprefix + reffai	
+	refidx = GetBase(refasm) + ".idx"
 	#index the reference
 	command=bwa + " index -p " + refidx + " " + refasm
 	if not os.path.exists(refidx + ".bwt"):
 		print("Index the reference: " + command)
 		os.system(command)
 	#index the reference with samtools faidx 
+	reffai=refasm + ".fai"	
 	command = samtools + " faidx " + refasm
 	if not os.path.exists(reffai):
 		print("Index the reference: " + command)
