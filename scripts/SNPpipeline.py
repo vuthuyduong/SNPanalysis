@@ -39,14 +39,12 @@ def SNP_calling_longshot(genome,reference):
 	refasm = reference["asm"]
 	if not refasm.startswith("/"):
 		refasm=dataprefix + refasm
-	reffai = reference["fai"]
-	if not reffai.startswith("/"):
-		reffai=dataprefix + reffai	
-	#index the reference with samtools faidx 
+	#index the reference with samtools faidx 		
+	reffai=refasm + ".fai"	
 	command = samtools + " faidx " + refasm
 	if not os.path.exists(reffai):
-		print(command)
-		os.system(command)
+		print("Index the reference: " + command)
+		os.system(command)	
 	fastqfile=genome['fastq']
 	if not fastqfile.startswith("/"):
 		fastqfile=dataprefix + fastqfile
