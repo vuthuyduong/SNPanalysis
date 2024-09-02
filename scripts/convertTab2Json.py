@@ -45,7 +45,7 @@ def Tab2Json(inputfilename):
 	reference.setdefault("dict","")
 	inputdict.setdefault("reference",reference)
 	genomes={}
-	inputfile=open(inputfilename)
+	inputfile=open(inputfilename, errors='ignore')
 	headers=next(inputfile).split("\t")
 	for line in inputfile:
 		genome={}

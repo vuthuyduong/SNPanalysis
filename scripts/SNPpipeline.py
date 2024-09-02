@@ -35,6 +35,19 @@ def GetBase(filename):
 	return filename[:-(len(filename)-filename.rindex("."))]
 
 def SNP_calling_longshot(genome,reference):
+	genomeid = genome["id"]
+	result = resultfoldername + "/" + genomeid
+	samfile=result + ".sam"
+	bamfile=result + ".bam"
+	baifile=result + ".bam.bai"
+	vcffile=result + ".vcf"
+	snpfile=result + ".snp.vcf"
+	filteredsnpfile=result + ".filtered.snp.vcf"
+	
+	if os.path.exists(snpfile):
+		print("Please delete files " + result  + ".* if you wish to recompute vcf files for " + genomeid + ".")
+		return
+	
 	refasm = reference["asm"]
 	refasm = reference["asm"]
 	if not refasm.startswith("/"):
@@ -48,13 +61,7 @@ def SNP_calling_longshot(genome,reference):
 	fastqfile=genome['fastq']
 	if not fastqfile.startswith("/"):
 		fastqfile=dataprefix + fastqfile
-	result = resultfoldername + "/" + genome['id']
-	samfile=result + ".sam"
-	bamfile=result + ".bam"
-	baifile=result + ".bam.bai"
-	vcffile=result + ".vcf"
-	snpfile=result + ".snp.vcf"
-	filteredsnpfile=result + ".filtered.snp.vcf"
+	
 	
 	#align each genome to the reference
 	command = minimap2 + " -a " +  refasm + " " + fastqfile + " > "  + samfile
@@ -93,6 +100,20 @@ def SNP_calling_longshot(genome,reference):
 		os.system("mv out.recode.vcf " + filteredsnpfile)
 		
 def SNP_calling_gatk(genome,reference):	
+	genomeid = genome["id"]
+	result = resultfoldername + "/" + genomeid
+	samfile= result + ".sam"
+	bamfile=result + ".bam"
+	markedfile=result + ".marked.bam"
+	markedtxtfile= result + ".marked.txt"
+	vcffile=result + ".vcf"
+	snpfile=result + ".snp.vcf"
+	filteredsnpfile=result + ".filtered.snp.vcf"
+	
+	if os.path.exists(snpfile):
+		print("Please delete files " + result  + ".* if you wish to recompute vcf files for " + genomeid + ".")
+		return
+
 	refasm = reference["asm"]
 	if not refasm.startswith("/"):
 		refasm=dataprefix + refasm
@@ -121,20 +142,7 @@ def SNP_calling_gatk(genome,reference):
 		fastq1=dataprefix + fastq1
 	if not fastq2.startswith("/"):
 		fastq2=dataprefix + fastq2	
-	genomeid = genome["id"]
-	result = resultfoldername + "/" + genomeid
-	samfile= result + ".sam"
-	bamfile=result + ".bam"
-	markedfile=result + ".marked.bam"
-	markedtxtfile= result + ".marked.txt"
-	vcffile=result + ".vcf"
-#	reportfile=result + "_report.table"
-#	bqsrbamfile=result + "_bqsr.bam"
-#	bqsrvcffile=result + "_bqsr.vcf"
-	snpfile=result + ".snp.vcf"
-	filteredsnpfile=result + ".filtered.snp.vcf"
-#	indelfile=result + ".indel.vcf"
-#	filteredindelfile=result + ".filtered.indel.vcf"
+	
 	#mapping
 	command = bwa + " mem -M -R \"@RG\\tID:group1\\tSM:" + genomeid + "\\tPL:illumina\\tLB:lib1\\tPU:unit1\" " + refidx + " " + fastq1 + " " + fastq2 + " > " + samfile
 	if not os.path.exists(samfile):
