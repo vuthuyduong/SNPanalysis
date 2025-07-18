@@ -212,16 +212,16 @@ def Download(genome):
 	fastq2=""
 	if "fastq" in genome.keys():
 		fastq= genome["fastq"]
-		if not fastq.startswith("/"):
+		if (not fastq.startswith("/")) and fastq!="":
 			fastq=dataprefix + fastq
 	if "fastq1" in genome.keys():	
 		fastq1=genome["fastq1"]
-		if not fastq1.startswith("/"):
+		if not fastq1.startswith("/") and fastq1!="":
 			fastq1=dataprefix + fastq1
 	if "fastq2" in genome.keys():	
 		fastq2= genome["fastq2"]
-		if not fastq2.startswith("/"):
-			fastq2=dataprefix + fastq2	
+		if not fastq2.startswith("/") and fastq2!="":
+			fastq2=dataprefix + fastq2			
 	if os.path.exists(fastq):
 		return
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
@@ -304,8 +304,8 @@ vcfmerge=data['vcfmerge']
 tabix=data['tabix']
 
 picard=data['picard']	
-if not ("java -jar") in picard:
-	picard="java -jar " + picard 
+if (not "java -jar" in picard) and (".jar" in picard):
+ 	picard="java -jar " + picard 
 prefetch=""
 if "prefetch" in data.keys():
 	prefetch=data["prefetch"]
@@ -325,6 +325,8 @@ longreads=[]
 shortreads=[]
 for key in genomes.keys():
 	genome=genomes[key]
+	if not ("id" in genome.keys()):
+		genome["id"]=key
 	fastq=""
 	fastq1=""
 	fastq2=""
@@ -343,8 +345,8 @@ for key in genomes.keys():
 			fastq2=dataprefix + fastq2	
 	if (os.path.exists(fastq)) or (os.path.exists(fastq1) and os.path.exists(fastq2)):
 		genomeexists=True
-	elif args.download=="yes":
-		#download fastq file if not existed
+	if args.download=="yes" or (fastq=="" and (fastq1=="" or fastq2=="")):
+		print("download " + key + "...")
 		Download(genome)
 	print("Looking for the SNPs of " + key)	
 	if reference["asm"]=="":
