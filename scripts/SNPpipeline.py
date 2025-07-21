@@ -246,7 +246,8 @@ def Download(genome):
 			if os.path.exists(sra + "/" + srafilename):
 				print("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
 				os.system("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
-				if sra != genomefolder:
+				print(sra)
+				if sra != genome["id"]:
 					os.system("rm -r " + sra )		
 			elif os.path.exists("~/ncbi/public/sra/" + srafilename):
 				#move srafile to the working folder
@@ -351,6 +352,7 @@ for key in genomes.keys():
 		Download(genome)
 	if reference["asm"]=="":
 		continue
+	continue
 	#SNP calling
 	if os.path.exists(fastq):
 		print("Looking for the SNPs of " + key)	
