@@ -345,20 +345,19 @@ for key in genomes.keys():
 		fastq2= genome["fastq2"]
 		if not fastq2.startswith("/"):
 			fastq2=dataprefix + fastq2	
-	if (os.path.exists(fastq)) or (os.path.exists(fastq1) and os.path.exists(fastq2)):
+	if (os.path.isfile(fastq)) or (os.path.isfile(fastq1) and os.path.isfile(fastq2)):
 		genomeexists=True
 	if args.download=="yes" or (fastq=="" and (fastq1=="" or fastq2=="")):
 		print("download " + key + "...")
 		Download(genome)
 	if reference["asm"]=="":
 		continue
-	continue
 	#SNP calling
-	if os.path.exists(fastq):
+	if os.path.isfile(fastq):
 		print("Looking for the SNPs of " + key)	
 		SNP_calling_longshot(genome,reference)
 		longreads.append(key)
-	elif os.path.exists(fastq1) and os.path.exists(fastq2):
+	elif os.path.isfile(fastq1) and os.path.isfile(fastq2):
 		print("Looking for the SNPs of " + key)	
 		SNP_calling_gatk(genome,reference)
 		shortreads.append(key)
