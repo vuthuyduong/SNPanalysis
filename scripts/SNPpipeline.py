@@ -246,7 +246,8 @@ def Download(genome):
 			if os.path.exists(sra + "/" + srafilename):
 				print("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
 				os.system("mv " + sra + "/" + srafilename + " " + genomefolder + "/")
-				os.system("rm -r " + sra )		
+				if sra != genomefolder:
+					os.system("rm -r " + sra )		
 			elif os.path.exists("~/ncbi/public/sra/" + srafilename):
 				#move srafile to the working folder
 				print("mv ~/ncbi/public/sra/" + srafilename + " " + genomefolder + "/")
@@ -348,14 +349,15 @@ for key in genomes.keys():
 	if args.download=="yes" or (fastq=="" and (fastq1=="" or fastq2=="")):
 		print("download " + key + "...")
 		Download(genome)
-	print("Looking for the SNPs of " + key)	
 	if reference["asm"]=="":
 		continue
 	#SNP calling
 	if os.path.exists(fastq):
+		print("Looking for the SNPs of " + key)	
 		SNP_calling_longshot(genome,reference)
 		longreads.append(key)
 	elif os.path.exists(fastq1) and os.path.exists(fastq2):
+		print("Looking for the SNPs of " + key)	
 		SNP_calling_gatk(genome,reference)
 		shortreads.append(key)
 	else:
